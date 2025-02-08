@@ -4,7 +4,8 @@ import process_data as pda
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from itertools import cycle
-import pickle5 as pickle
+import cloudpickle as pickle
+#original- import pickle5 as pickle  but not compatible w/ latest python 3.12, requires python >3.6 but <3.7
 
 #topic_df, model, vec, topic_list = pda.process_data()
 

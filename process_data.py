@@ -59,7 +59,7 @@ def return_topics(series, num_topics, no_top_words, model, vectorizer):
     doc_topic = def_model.transform(doc_word)
     #print('model components: ', def_model.components_[0].shape)
     #print('doc_topic', doc_topic[0])
-    model_components, topic_list = display_topics(def_model, vec.get_feature_names(), no_top_words)
+    model_components, topic_list = display_topics(def_model, vec.get_feature_names_out(), no_top_words) #original: vec.get_feature_names()
     return def_model.components_, doc_topic, def_model, vec, topic_list#, topics
 
 
@@ -113,6 +113,7 @@ def get_topic_classification_models():
     model_1 = predictive_modeling(jobs_df)
     return model, model_1, vec
 
+#original- was commented below
 # topic_model, classifier, vec= get_topic_classification_models()
 # topic_model_name = 'topic_model.sav'
 # classifier_name = 'classification_model.sav'
