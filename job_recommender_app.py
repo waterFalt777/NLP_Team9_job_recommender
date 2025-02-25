@@ -8,7 +8,7 @@ import pickle
 import re
 
 #Introduce App
-st.title('Job Recommender')
+st.title('🔥Hot Zot Jobs Recommender for MSBA Students 💼🐜🍽️')
 st.markdown('(Non-Technical Business Roles in 60 - 120k Salary Range + Data Scientists)')
 st.sidebar.markdown("See which jobs best match your profile and optimize your resume / LinkedIn!")
 st.sidebar.markdown("This app has 3 functionalities:")
@@ -58,6 +58,11 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
+#STEPH
+st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
+joblst = "job1"
+st.write(joblst)
+
 plot_user_probability()
 st.title('Representation Among Job Types')
 plot_clusters()
@@ -79,3 +84,7 @@ st.markdown('Matching Words:')
 st.markdown(match_string)
 st.markdown('Missing Words:')
 st.markdown(misses_string)
+
+
+#STEPH - REMOVE ERROR
+st.set_option('deprecation.showPyplotGlobalUse', False)
