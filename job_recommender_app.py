@@ -46,10 +46,15 @@ def plot_user_probability():
     plt.title('Percent Match of Job Type')
    
     #STEPH 
+    zippedDatalst = list(zip(data['jobs'],data['probability']))
+    # Sorting by second element
+    highest_prob_lst = sorted(zippedDatalst, key=lambda x: -x[1],)
+    print(highest_prob_lst)
     #print(sorted(data['jobs']), sorted(data['probability'])) #need to sort thiso ut
 
-
     st.pyplot()
+    return highest_prob_lst
+
 
 #Plot where user fits in with other job clusters
 def plot_clusters():
@@ -63,15 +68,17 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
-#STEPH
-st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
 
-joblst = pda.returnTop5Jobs("data,analyst")
-st.write(joblst)
 
-plot_user_probability()
+problst = plot_user_probability()
 st.title('Representation Among Job Types')
 plot_clusters()
+
+#STEPH
+st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
+top_profession = problst[0][0]
+joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
+st.write(joblst)
 
 st.title('Find Matching Keywords')
 st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
