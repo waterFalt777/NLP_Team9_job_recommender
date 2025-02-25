@@ -44,6 +44,11 @@ def plot_user_probability():
     #plt.figure(figsize = (2.5,2.5))
     plt.barh(data['jobs'], data['probability'], color = 'r')
     plt.title('Percent Match of Job Type')
+   
+    #STEPH 
+    #print(sorted(data['jobs']), sorted(data['probability'])) #need to sort thiso ut
+
+
     st.pyplot()
 
 #Plot where user fits in with other job clusters
@@ -60,7 +65,8 @@ def plot_clusters():
 
 #STEPH
 st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
-joblst = "job1"
+
+joblst = pda.returnTop5Jobs("data,analyst")
 st.write(joblst)
 
 plot_user_probability()
