@@ -8,7 +8,7 @@ import pickle
 import re
 
 #Introduce App
-st.title('🔥Hot Zot Jobs Recommender for MSBA Students 💼🐜🍽️')
+st.title('Zot Jobs for MSBA Students 💼🐜🍽️')
 st.markdown('(Non-Technical Business Roles in 60 - 120k Salary Range + Data Scientists)')
 st.sidebar.markdown("See which jobs best match your profile and optimize your resume / LinkedIn!")
 st.sidebar.markdown("This app has 3 functionalities:")
@@ -42,17 +42,24 @@ data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability'])
 #Plot probability of person belonging to a job class
 def plot_user_probability():
     #plt.figure(figsize = (2.5,2.5))
-    plt.barh(data['jobs'], data['probability'], color = 'r')
-    plt.title('Percent Match of Job Type')
-   
+
+    #ORIGINAL
+    #plt.barh(data['jobs'], data['probability'], color = 'r')
+    #plt.title('Percent Match of Job Type')
+    
     #STEPH 
     zippedDatalst = list(zip(data['jobs'],data['probability']))
     # Sorting by second element
     highest_prob_lst = sorted(zippedDatalst, key=lambda x: -x[1],)
     print(highest_prob_lst)
-    #print(sorted(data['jobs']), sorted(data['probability'])) #need to sort thiso ut
+    
+    #plotting bar graph
 
+    data2 = data.sort_values(by=data.columns[1])#, ascending=False)
+    plt.barh(data2['jobs'], data2['probability'], color = 'r')
+    plt.title('Percent Match of Job Type')
     st.pyplot()
+    
     return highest_prob_lst
 
 
@@ -71,14 +78,17 @@ def plot_clusters():
 
 
 problst = plot_user_probability()
-st.title('Representation Among Job Types')
-plot_clusters()
+
 
 #STEPH
 st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
 top_profession = problst[0][0]
 joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
 st.write(joblst)
+
+#for SCATTER PLOT
+st.title('Representation Among Job Types')
+plot_clusters()
 
 st.title('Find Matching Keywords')
 st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')

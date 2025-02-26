@@ -102,13 +102,7 @@ def returnTop5Jobs(keyword):
     print(top_5_jobs_df.head(5))
     
     return top_5_jobs_df.head(5)
-'''
-    #Filter keywords to match user's keywords
-    jobs_df = pd.DataFrame(zip(df['Job Description'], df['keyword']), columns = ['Description', 'Job'])
-    print(jobs_df.head(5))
-    top_5_jobs_df = pd.DataFrame([k for k in jobs_df['keyword'] if k == keyword], columns = ['Description', 'Job'])
-    print("filtered dataframe: ", top_5_jobs_df.head(5))
-    '''
+
 
 def predictive_modeling(df):
     '''
