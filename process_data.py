@@ -81,6 +81,29 @@ def process_data():
     #Topic_DF.to_csv('topic_df.csv')
     return topic_df, topic_model, vec, topic_list
 
+#STEPH
+def returnTop5Jobs(keyword):
+    '''
+    Takes in the user's top keyword and returns the top 5 jobs that belong to the keyword
+    '''
+    df = pd.read_csv('jobs.csv') #make this universal later
+    
+    jobs_df = pd.DataFrame(zip(df['Job Description'], df['keyword']), columns=['Description', 'Job'])
+    
+    # Print the first 5 rows of the full DataFrame
+    print("All jobs data:")
+    print(jobs_df.head(5))
+    
+    # Filter rows where the 'Job' column matches the user's keyword
+    top_5_jobs_df = jobs_df[jobs_df['Job'] == keyword]
+    
+    # Return the top 5 rows of the filtered DataFrame
+    print("Filtered dataframe: ")
+    print(top_5_jobs_df.head(5))
+    
+    return top_5_jobs_df.head(5)
+
+
 def predictive_modeling(df):
     '''
     fits, optimizes, and predicts job class based on topic modeling corpus

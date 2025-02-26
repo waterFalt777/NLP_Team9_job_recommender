@@ -8,7 +8,7 @@ import pickle
 import re
 
 #Introduce App
-st.title('Job Recommender')
+st.title('Zot Jobs for MSBA Students 💼🐜🍽️')
 st.markdown('(Non-Technical Business Roles in 60 - 120k Salary Range + Data Scientists)')
 st.sidebar.markdown("See which jobs best match your profile and optimize your resume / LinkedIn!")
 st.sidebar.markdown("This app has 3 functionalities:")
@@ -42,9 +42,26 @@ data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability'])
 #Plot probability of person belonging to a job class
 def plot_user_probability():
     #plt.figure(figsize = (2.5,2.5))
-    plt.barh(data['jobs'], data['probability'], color = 'r')
+
+    #ORIGINAL
+    #plt.barh(data['jobs'], data['probability'], color = 'r')
+    #plt.title('Percent Match of Job Type')
+    
+    #STEPH 
+    zippedDatalst = list(zip(data['jobs'],data['probability']))
+    # Sorting by second element
+    highest_prob_lst = sorted(zippedDatalst, key=lambda x: -x[1],)
+    print(highest_prob_lst)
+    
+    #plotting bar graph
+
+    data2 = data.sort_values(by=data.columns[1])#, ascending=False)
+    plt.barh(data2['jobs'], data2['probability'], color = 'r')
     plt.title('Percent Match of Job Type')
     st.pyplot()
+    
+    return highest_prob_lst
+
 
 #Plot where user fits in with other job clusters
 def plot_clusters():
@@ -58,7 +75,18 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
-plot_user_probability()
+
+
+problst = plot_user_probability()
+
+
+#STEPH
+st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
+top_profession = problst[0][0]
+joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
+st.write(joblst)
+
+#for SCATTER PLOT
 st.title('Representation Among Job Types')
 plot_clusters()
 
@@ -79,3 +107,7 @@ st.markdown('Matching Words:')
 st.markdown(match_string)
 st.markdown('Missing Words:')
 st.markdown(misses_string)
+
+
+#STEPH - REMOVE ERROR
+st.set_option('deprecation.showPyplotGlobalUse', False)
