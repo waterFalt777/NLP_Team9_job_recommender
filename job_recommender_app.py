@@ -6,22 +6,30 @@ import matplotlib.pyplot as plt
 import word_similarity
 import pickle
 import re
+import PyPDF2
+
 
 #Introduce App
-st.title('Zot Jobs for MSBA Students 💼🐜🍽️')
-st.markdown('(Non-Technical Business Roles in 60 - 120k Salary Range + Data Scientists)')
-st.sidebar.markdown("See which jobs best match your profile and optimize your resume / LinkedIn!")
-st.sidebar.markdown("This app has 3 functionalities:")
-st.sidebar.markdown("1. Predict which job type you match most with based on your resume / LinkedIn.")
+st.title('MSBA Analytic Career Dashboard 💼🐜🍽️')
+st.sidebar.header('Submit Your Resume 📄')
 
-st.sidebar.markdown("2. Show which job cluster your resume fits within.")
 
-st.sidebar.markdown("3. Help you find which keywords you're missing and matching for your dream job!")
-
-st.sidebar.markdown("Scroll Down to See All Functionalities!")
-
+st.markdown('This dashboard is designed to help you find the best job for you based on your resume')
 #Get and transform user's resume or linkedin
-user_input = st.text_area("copy and paste your resume or linkedin here", '')
+
+# Upload resume file
+uploaded_file = st.sidebar.file_uploader("Upload your resume (PDF)", type=["pdf"])
+
+if uploaded_file is not None:
+    # Read the uploaded PDF file
+    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+    user_input = ""
+    for page_num in range(len(pdf_reader.pages)):
+        page = pdf_reader.pages[page_num]
+        user_input += page.extract_text()
+else:
+    user_input = st.sidebar.text_area("Or copy and paste your resume or LinkedIn here", '')
+
 
 user_input = str(user_input)
 user_input = re.sub('[^a-zA-Z0-9\.]', ' ', user_input)
@@ -102,6 +110,7 @@ st.write('You selected:', option)
 matches, misses = word_similarity.resume_reader(user_input, option)
 match_string = ' '.join(matches)
 misses_string = ' '.join(misses)
+
 
 st.markdown('Matching Words:')
 st.markdown(match_string)
