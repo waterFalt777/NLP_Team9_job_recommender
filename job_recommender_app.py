@@ -7,6 +7,7 @@ import word_similarity
 import pickle
 import re
 import PyPDF2
+import matplotlib.colors as mcolors
 
 
 #Introduce App
@@ -64,9 +65,36 @@ def plot_user_probability():
     #plotting bar graph
 
     data2 = data.sort_values(by=data.columns[1])#, ascending=False)
-    plt.barh(data2['jobs'], data2['probability'], color = 'r')
+    # plt.barh(data2['jobs'], data2['probability'], color = 'r')
+
+    #Gradient color map
+    cmap = plt.get_cmap('cividis')
+    norm = mcolors.Normalize(vmin=data2['probability'].min(), vmax=data2['probability'].max())
+    colors = cmap(norm(data2['probability']))
+
+    #Plot
+    fig, ax = plt.subplots()
+    bars = ax.barh(data2['jobs'], data2['probability'], color=colors)
+
+    # Set the background to be transparent
+    fig.patch.set_alpha(0.0)
+    ax.patch.set_alpha(0.0)
+
+     # Customize the appearance
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color('white')
+    ax.spines['bottom'].set_color('white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+
     plt.title('Percent Match of Job Type')
-    st.pyplot()
+    # Display the plot in Streamlit
+    st.pyplot(fig)
+
+    #st.pyplot()
     
     return highest_prob_lst
 
