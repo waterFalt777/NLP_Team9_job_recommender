@@ -7,7 +7,13 @@ import word_similarity
 import pickle
 import re
 import PyPDF2
+
+#added
 import matplotlib.colors as mcolors
+from wordcloud import WordCloud
+
+
+st.set_page_config(layout="wide")
 
 
 #Introduce App
@@ -50,12 +56,7 @@ data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability'])
 
 #Plot probability of person belonging to a job class
 def plot_user_probability():
-    #plt.figure(figsize = (2.5,2.5))
-
-    #ORIGINAL
-    #plt.barh(data['jobs'], data['probability'], color = 'r')
-    #plt.title('Percent Match of Job Type')
-    
+  
     #STEPH 
     zippedDatalst = list(zip(data['jobs'],data['probability']))
     # Sorting by second element
@@ -90,7 +91,7 @@ def plot_user_probability():
     ax.xaxis.label.set_color('white')
     ax.yaxis.label.set_color('white')
 
-    plt.title('Percent Match of Job Type')
+    plt.title('Percent Match of Job Type', color='white')
     # Display the plot in Streamlit
     st.pyplot(fig)
 
@@ -111,39 +112,60 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
+# Function to generate and display word cloud
+def display_wordcloud(text):
+    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='viridis').generate(text)
+    fig, ax = plt.subplots()
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis('off')
+    st.pyplot(fig)
 
 
-problst = plot_user_probability()
+
+c1, c2 = st.columns((4,3))
+with c1:
+   problst = plot_user_probability()
+
+with c2:
+    #STEPH
+    #st.header("TOP MATCHING JOBS For {}:".format(problst[0][0]))
+    top_profession = problst[0][0]
+    st.markdown(
+        f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{top_profession}</span>:</h3>",
+        unsafe_allow_html=True)
+    joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
+    st.write(joblst)
 
 
-#STEPH
-st.title("🔥💼TOP 5 MATCHING JOBS 💼🔥")
-top_profession = problst[0][0]
-joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
-st.write(joblst)
+c1, c2 = st.columns((4,3))
+with c1:
+    #for SCATTER PLOT
+    st.title('Representation Among Job Types')
+    plot_clusters()
+with c2:
+    st.title('Find Matching Keywords')
+    st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
+    st.markdown("The displayed keywords are stemmed, ie 'analysis' --> 'analys' and 'commision' --> 'commiss'")
+    option = st.selectbox(
+        'Which job would you like to compare to?',
+    ('ux,designer', 'data,analyst', 'project,manager', 'product,manager', 'account,manager', 'consultant', 'marketing', 'sales',
+    'data,scientist'))
 
-#for SCATTER PLOT
-st.title('Representation Among Job Types')
-plot_clusters()
-
-st.title('Find Matching Keywords')
-st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
-st.markdown("The displayed keywords are stemmed, ie 'analysis' --> 'analys' and 'commision' --> 'commiss'")
-option = st.selectbox(
-    'Which job would you like to compare to?',
- ('ux,designer', 'data,analyst', 'project,manager', 'product,manager', 'account,manager', 'consultant', 'marketing', 'sales',
- 'data,scientist'))
-
-st.write('You selected:', option)
-matches, misses = word_similarity.resume_reader(user_input, option)
-match_string = ' '.join(matches)
-misses_string = ' '.join(misses)
+    st.write('You selected:', option)
+    matches, misses = word_similarity.resume_reader(user_input, option)
+    match_string = ' '.join(matches)
+    misses_string = ' '.join(misses)
 
 
-st.markdown('Matching Words:')
-st.markdown(match_string)
-st.markdown('Missing Words:')
-st.markdown(misses_string)
+    # st.markdown('Matching Words:')
+    # st.markdown(match_string)
+    # st.markdown('Missing Words:')
+    # st.markdown(misses_string)
+    st.markdown('Matching Words:')
+    display_wordcloud(match_string)  # Display word cloud for matching words
+    st.markdown('Missing Words:')
+    display_wordcloud(misses_string)  # Display word cloud for missing words
+
 
 
 #STEPH - REMOVE ERROR
