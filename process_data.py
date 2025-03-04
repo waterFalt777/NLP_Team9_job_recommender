@@ -88,20 +88,21 @@ def returnTop5Jobs(keyword):
     '''
     df = pd.read_csv('jobs.csv') #make this universal later
     
-    jobs_df = pd.DataFrame(zip(df['Job Description'], df['keyword']), columns=['Description', 'Job'])
+    jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job'])
     
     # Print the first 5 rows of the full DataFrame
-    print("All jobs data:")
-    print(jobs_df.head(5))
+    #TODO: I would need to match the description here !!
+    #print("All jobs data:")
+    #print(jobs_df.head(5))
     
     # Filter rows where the 'Job' column matches the user's keyword
     top_5_jobs_df = jobs_df[jobs_df['Job'] == keyword]
     
     # Return the top 5 rows of the filtered DataFrame
     print("Filtered dataframe: ")
-    print(top_5_jobs_df.head(5))
+    print(top_5_jobs_df.head(3)) 
     
-    return top_5_jobs_df.head(5)
+    return top_5_jobs_df.head(3)
 
 
 def predictive_modeling(df):

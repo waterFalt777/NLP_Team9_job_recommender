@@ -13,7 +13,32 @@ import matplotlib.colors as mcolors
 from wordcloud import WordCloud
 
 
+
+#Wide layout
 st.set_page_config(layout="wide")
+
+# Load custom CSS from styles.css
+with open("styles.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Add custom JavaScript for the "Read more" functionality #TOGGLE DOESN'T WORK
+st.markdown(
+    """
+    <script>
+    function toggleReadMore(id) {
+        var element = document.getElementById(id);
+        if (element.classList.contains('expanded')) {
+            element.classList.remove('expanded');
+        } else {
+            element.classList.add('expanded');
+        }
+    }
+    </script>
+    """,
+    unsafe_allow_html=True
+)
+
+
 
 
 #Introduce App
@@ -121,20 +146,35 @@ def display_wordcloud(text):
     st.pyplot(fig)
 
 
-
 c1, c2 = st.columns((4,3))
 with c1:
-   problst = plot_user_probability()
+   with st.container():
+    problst = plot_user_probability()
+
 
 with c2:
     #STEPH
-    #st.header("TOP MATCHING JOBS For {}:".format(problst[0][0]))
     top_profession = problst[0][0]
     st.markdown(
         f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{top_profession}</span>:</h3>",
         unsafe_allow_html=True)
-    joblst = pda.returnTop5Jobs(top_profession)#"data,analyst")
-    st.write(joblst)
+    joblst = pda.returnTop5Jobs(top_profession)
+    #st.write(joblst)
+
+      # Display job cards
+    for i, (index, job) in enumerate(joblst.iterrows()):
+        job_description = job[0]
+        short_description = ' '.join(job_description.split()[:300]) + '...'
+        st.markdown(
+            f"""
+            <div class="job-card">
+                <div class="job-title">{job[1]}</div>
+                <div class="job-description" id="job-description-{i}">{short_description}</div>
+                <div class="read-more" onclick="toggleReadMore('job-description-{i}')">Read more</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 
 c1, c2 = st.columns((4,3))
@@ -152,19 +192,17 @@ with c2:
     'data,scientist'))
 
     st.write('You selected:', option)
-    matches, misses = word_similarity.resume_reader(user_input, option)
-    match_string = ' '.join(matches)
-    misses_string = ' '.join(misses)
+
+    if user_input[0] != "":
+        matches, misses = word_similarity.resume_reader(user_input, option)
+        match_string = ' '.join(matches)
+        misses_string = ' '.join(misses)
 
 
-    # st.markdown('Matching Words:')
-    # st.markdown(match_string)
-    # st.markdown('Missing Words:')
-    # st.markdown(misses_string)
-    st.markdown('Matching Words:')
-    display_wordcloud(match_string)  # Display word cloud for matching words
-    st.markdown('Missing Words:')
-    display_wordcloud(misses_string)  # Display word cloud for missing words
+        st.markdown('Matching Words:')
+        display_wordcloud(match_string)  # Display word cloud for matching words
+        st.markdown('Missing Words:')
+        display_wordcloud(misses_string)  # Display word cloud for missing words
 
 
 

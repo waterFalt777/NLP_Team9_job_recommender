@@ -1,0 +1,32 @@
+/* styles.css */
+.job-card {
+    border: 2px solid yellow;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.job-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+.job-description {
+    font-size: 16px;
+    color: white;
+    overflow: hidden;
+    max-height: 100px;
+    transition: max-height 0.3s ease;
+    
+}
+.job-description.expanded {
+    max-height: none;
+}
+.read-more {
+    color: yellow;
+    cursor: pointer;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: black;
+    padding: 5px;
+}
