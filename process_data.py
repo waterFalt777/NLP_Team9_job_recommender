@@ -95,9 +95,10 @@ def returnTop5Jobs(keyword):
     #print("All jobs data:")
     #print(jobs_df.head(5))
     
+     
     # Filter rows where the 'Job' column matches the user's keyword
     top_5_jobs_df = jobs_df[jobs_df['Job'] == keyword]
-    
+    print(top_5_jobs_df)    
     # Return the top 5 rows of the filtered DataFrame
     print("Filtered dataframe: ")
     print(top_5_jobs_df.head(3)) 
