@@ -104,6 +104,39 @@ def returnTop5Jobs(keyword):
     return top_5_jobs_df.head(5)
 
 
+#ANI
+def calculate_job_similarities(user_input, top_5_jobs_df):
+    '''
+    Calculate cosine similarity between user input and job descriptions,
+    rank jobs, and return similarity scores as percentages
+    '''
+    # Initialize TF-IDF vectorizer
+    tfidf = TfidfVectorizer(stop_words='english')
+    
+    # Combine user input and job descriptions
+    all_text = [user_input] + list(top_5_jobs_df['Description'])
+    
+    # Create TF-IDF matrix
+    tfidf_matrix = tfidf.fit_transform(all_text)
+    
+    # Calculate cosine similarity between user input and each job description
+    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
+    
+    # Create a dataframe with jobs and their similarity scores
+    similarity_df = pd.DataFrame({
+        'Description': top_5_jobs_df['Description'],
+        'Job': top_5_jobs_df['Job'],
+        'Similarity': cosine_similarities[0] * 100  # Convert to percentage
+    })
+    
+    # Sort by similarity score in descending order
+    ranked_jobs = similarity_df.sort_values(by='Similarity', ascending=False)
+    
+    # Round similarity scores to 2 decimal places
+    ranked_jobs['Similarity'] = ranked_jobs['Similarity'].round(2)
+    
+    return ranked_jobs
+
 def predictive_modeling(df):
     '''
     fits, optimizes, and predicts job class based on topic modeling corpus
