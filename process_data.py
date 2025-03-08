@@ -48,7 +48,6 @@ def return_topics(series, num_topics, no_top_words, model, vectorizer):
     series = tokenize_stem(series)
     #transform series into corpus
     ex_label = [e[:30]+"..." for e in series]
-    #set vectorizer ngrams = (2,2)
     vec = vectorizer(stop_words = 'english')
 
     doc_word = vec.fit_transform(series)
@@ -57,8 +56,6 @@ def return_topics(series, num_topics, no_top_words, model, vectorizer):
     def_model = model(num_topics)
     def_model = def_model.fit(doc_word)
     doc_topic = def_model.transform(doc_word)
-    #print('model components: ', def_model.components_[0].shape)
-    #print('doc_topic', doc_topic[0])
     model_components, topic_list = display_topics(def_model, vec.get_feature_names_out(), no_top_words) #original: vec.get_feature_names()
     return def_model.components_, doc_topic, def_model, vec, topic_list#, topics
 
@@ -81,29 +78,55 @@ def process_data():
     #Topic_DF.to_csv('topic_df.csv')
     return topic_df, topic_model, vec, topic_list
 
+
+
 #STEPH
-def returnTop5Jobs(keyword):
+def returnJobsByKeywd(keyword):
     '''
     Takes in the user's top keyword and returns the top 5 jobs that belong to the keyword
     '''
     df = pd.read_csv('jobs.csv') #make this universal later
-    
     jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job'])
-    
-    # Print the first 5 rows of the full DataFrame
-    #TODO: I would need to match the description here !!
-    #print("All jobs data:")
-    #print(jobs_df.head(5))
-    
-     
     # Filter rows where the 'Job' column matches the user's keyword
-    top_5_jobs_df = jobs_df[jobs_df['Job'] == keyword]
-    print(top_5_jobs_df)    
-    # Return the top 5 rows of the filtered DataFrame
-    print("Filtered dataframe: ")
-    print(top_5_jobs_df.head(3)) 
+    JobsByKeywd = jobs_df[jobs_df['Job'] == keyword]
+   
     
-    return top_5_jobs_df.head(3)
+    return JobsByKeywd
+
+#ANI
+def calculate_job_similarities(user_input, top_5_jobs_df):
+    '''
+    Calculate cosine similarity between user input and job descriptions,
+    rank jobs, and return similarity scores as percentages
+    '''
+    # Initialize TF-IDF vectorizer
+    tfidf = TfidfVectorizer(stop_words='english')
+    
+    # Combine user input and job descriptions
+    all_text = [user_input] + list(top_5_jobs_df['Description'])
+    
+    # Create TF-IDF matrix
+    tfidf_matrix = tfidf.fit_transform(all_text)
+    
+    # Calculate cosine similarity between user input and each job description
+    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
+    
+    # Create a dataframe with jobs and their similarity scores
+    similarity_df = pd.DataFrame({
+        'Description': top_5_jobs_df['Description'],
+        'Job': top_5_jobs_df['Job'],
+        'Similarity': cosine_similarities[0] * 100  # Convert to percentage
+    })
+    
+    # Sort by similarity score in descending order
+    ranked_jobs = similarity_df.sort_values(by='Similarity', ascending=False)
+    
+    # Round similarity scores to 2 decimal places
+    ranked_jobs['Similarity'] = ranked_jobs['Similarity'].round(2)
+    
+    return ranked_jobs.head(5)
+
+
 
 
 def predictive_modeling(df):
@@ -113,12 +136,6 @@ def predictive_modeling(df):
     X,y = df.iloc[:,0:-1], df.iloc[:, -1]
     X_tr, X_te, y_tr, y_te = train_test_split(X,y)
 
-    param_grid = {'n_estimators': [100,300, 400, 500, 600], 'max_depth': [3,7,9, 11]}
-    # search = GridSearchCV(RandomForestClassifier(), param_grid, cv=5)
-    # search.fit(X_tr, y_tr)
-    # bp = search.best_params_
-    # print(bp)
-    #rfc = RandomForestClassifier(n_estimators = bp['n_estimators'], max_depth = bp['max_depth'])
     rfc = RandomForestClassifier(n_estimators = 500, max_depth = 9)
     rfc.fit(X_tr, y_tr)
     print('acc: ', np.mean(cross_val_score(rfc, X_tr, y_tr, scoring = 'accuracy', cv=5)))
@@ -138,62 +155,13 @@ def get_topic_classification_models():
     model_1 = predictive_modeling(jobs_df)
     return model, model_1, vec
 
-#original- was commented below
-# topic_model, classifier, vec= get_topic_classification_models()
-# topic_model_name = 'topic_model.sav'
-# classifier_name = 'classification_model.sav'
-# vec_name = 'job_vec.sav'
-# pickle.dump(topic_model, open(topic_model_name, 'wb'))
-# pickle.dump(classifier, open(classifier_name, 'wb'))
-# pickle.dump(vec, open(vec_name, 'wb'))
 
 def main(resume, topic_model, predictor, vec):
     '''
     run code that predicts resume
     '''
-    #jobs_df, model, vec , topic_list= process_data()
-    #model_1 = predictive_modeling(jobs_df)
-
+    
     doc = tokenize_stem(resume)
     doc = vec.transform(doc)
     probabilities, classes = predict_resume(topic_model, predictor, doc)
     return classes, probabilities[0]*100
-
-
-
-    # for i,doc in enumerate(resumes.Resumes):
-    #     doc = tokenize_stem(pd.Series(doc))
-    #     doc = vec.transform(doc)
-    #     #do cosine similarity compared to job 1 to job 100
-    #     #this would spit out the specifc job application +
-    #     print(resumes.Person[i])
-    #     print('----------------')
-    #     probabilities, classes = predict_resume(model, model_1, doc)
-    #     for i in range(len(probabilities[0])):
-    #         print(classes[i], ': ', probabilities[0][i]*100, '%')
-
-#main()
-#we tried out SVD and NMF, Count Vec and TFIDIF - best combo is SVD and TFIDF
-
-# look at topics and see what makes sense
-
-# recommend roles that are best for you based on supervised learnings
-
-# these are the jobs descriptions that are best for you based on your resume
-
-# these are the best words for your resume based on which job you want to go into
-
-
-# NEXT STEPS:
-# Now we have to fit resumes according to the topic modeling model -
-    #we my want to add a new function in here to fit the resumes and test out the product
-
-    #then we have to turn the model into a streamlit app
-
-    #last we want to make the app pretty and have users test it / upload it to the internet for real
-
-    #make presentation
-
-# Also have to create app and return the
-
-#get chart of top toppics from topic modeling

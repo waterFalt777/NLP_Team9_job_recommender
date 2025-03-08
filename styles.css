@@ -1,6 +1,6 @@
 /* styles.css */
 .job-card {
-    border: 2px solid yellow;
+    border: 2px solid cyan;
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 10px;
@@ -25,8 +25,18 @@
     color: yellow;
     cursor: pointer;
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 10px;
+    right: 10px;
     background: black;
     padding: 5px;
+}
+
+
+/*DOESN'T SHRINK*/
+.small-container{
+    width: 25%;
+    margin: auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }

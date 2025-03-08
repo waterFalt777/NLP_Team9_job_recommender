@@ -13,30 +13,12 @@ import matplotlib.colors as mcolors
 from wordcloud import WordCloud
 
 
-
+# UI Stuff
 #Wide layout
 st.set_page_config(layout="wide")
-
 # Load custom CSS from styles.css
 with open("styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-# Add custom JavaScript for the "Read more" functionality #TOGGLE DOESN'T WORK
-st.markdown(
-    """
-    <script>
-    function toggleReadMore(id) {
-        var element = document.getElementById(id);
-        if (element.classList.contains('expanded')) {
-            element.classList.remove('expanded');
-        } else {
-            element.classList.add('expanded');
-        }
-    }
-    </script>
-    """,
-    unsafe_allow_html=True
-)
 
 
 
@@ -47,7 +29,6 @@ st.sidebar.header('Submit Your Resume 📄')
 
 
 st.markdown('This dashboard is designed to help you find the best job for you based on your resume')
-#Get and transform user's resume or linkedin
 
 # Upload resume file
 uploaded_file = st.sidebar.file_uploader("Upload your resume (PDF)", type=["pdf"])
@@ -62,15 +43,15 @@ if uploaded_file is not None:
 else:
     user_input = st.sidebar.text_area("Or copy and paste your resume or LinkedIn here", '')
 
-
 user_input = str(user_input)
 user_input = re.sub('[^a-zA-Z0-9\.]', ' ', user_input)
-user_input = user_input.lower()
+str_user_input = user_input.lower()
 
-user_input = pd.Series(user_input)
+user_input = pd.Series(str_user_input)
+
+
 
 #load NLP + classification models
-
 topic_model = pickle.load(open('topic_model.sav', 'rb'))
 classifier = pickle.load(open('classification_model.sav', 'rb'))
 vec = pickle.load(open('job_vec.sav', 'rb'))
@@ -86,10 +67,8 @@ def plot_user_probability():
     zippedDatalst = list(zip(data['jobs'],data['probability']))
     # Sorting by second element
     highest_prob_lst = sorted(zippedDatalst, key=lambda x: -x[1],)
-    print(highest_prob_lst)
     
     #plotting bar graph
-
     data2 = data.sort_values(by=data.columns[1])#, ascending=False)
     # plt.barh(data2['jobs'], data2['probability'], color = 'r')
 
@@ -119,8 +98,6 @@ def plot_user_probability():
     plt.title('Percent Match of Job Type', color='white')
     # Display the plot in Streamlit
     st.pyplot(fig)
-
-    #st.pyplot()
     
     return highest_prob_lst
 
@@ -137,72 +114,102 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
-# Function to generate and display word cloud
-def display_wordcloud(text):
-    wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='viridis').generate(text)
-    fig, ax = plt.subplots()
-    ax.imshow(wordcloud, interpolation='bilinear')
-    ax.axis('off')
-    st.pyplot(fig)
+# Function to generate and display word cloud // BACK BURNER
+# def display_wordcloud(text):
+#     wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='viridis').generate(text)
+#     fig, ax = plt.subplots()
+#     ax.imshow(wordcloud, interpolation='bilinear')
+#     ax.axis('off')
+#     st.pyplot(fig)
 
+
+#CONTAINERS IN DASHBOARD
 
 c1, c2 = st.columns((4,3))
 with c1:
    with st.container():
-    problst = plot_user_probability()
+    st.markdown('<div class="small-container>', unsafe_allow_html=True)
+    st.header('Top Matching Job Types')
+    if str_user_input == "":
+        st.write("Please enter your resume in the text box above or upload a PDF file")
+    else:
+        st.markdown('<div class="small-container>', unsafe_allow_html=True)
+        problst = plot_user_probability()
+   with st.container():
+        st.header('Representation Among Job Types')
+        if str_user_input != "":
+            st.markdown('<div class="small-container>', unsafe_allow_html=True)
+            plot_clusters()
 
 
 with c2:
     #STEPH
-    top_profession = problst[0][0]
-    st.markdown(
-        f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{top_profession}</span>:</h3>",
-        unsafe_allow_html=True)
-    joblst = pda.returnTop5Jobs(top_profession)
-    #st.write(joblst)
+    if str_user_input == "":
+        st.markdown(
+            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'> ... </span>:</h3>",
+            unsafe_allow_html=True)
+        st.write("Please enter your resume in the text box above or upload a PDF file")
+    else:
+        top_profession = problst[0][0]
+        st.markdown(
+            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{top_profession}</span>:</h3>",
+            unsafe_allow_html=True)
+        joblst = pda.returnJobsByKeywd(top_profession)
+        top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst)
 
       # Display job cards
-    for i, (index, job) in enumerate(joblst.iterrows()):
-        job_description = job[0]
-        short_description = ' '.join(job_description.split()[:300]) + '...'
-        st.markdown(
-            f"""
-            <div class="job-card">
-                <div class="job-title">{job[1]}</div>
-                <div class="job-description" id="job-description-{i}">{short_description}</div>
-                <div class="read-more" onclick="toggleReadMore('job-description-{i}')">Read more</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
+            job_description = job[0]
+            short_description = ' '.join(job_description.split()[:300]) + '...'
+            job_similarity = job[2]
+            st.markdown(
+                        f"""
+                            <div class="job-card">
+                                <div class="job-title">{job[1]}</div>
+                                <div class="job-similarity" style="color: yellow;">Similarity: {job_similarity}%</div>
+                                <div class="job-description">{short_description}</div>
+                            </div>
+                        """,
+                        unsafe_allow_html=True
+                )
+            with st.expander("Read more"):
+                st.markdown(
+                        f"""
+                            <div class="expanded-job-description">
+                                {job[0]}
+                            </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
 
-c1, c2 = st.columns((4,3))
-with c1:
-    #for SCATTER PLOT
-    st.title('Representation Among Job Types')
-    plot_clusters()
-with c2:
-    st.title('Find Matching Keywords')
-    st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
-    st.markdown("The displayed keywords are stemmed, ie 'analysis' --> 'analys' and 'commision' --> 'commiss'")
-    option = st.selectbox(
-        'Which job would you like to compare to?',
-    ('ux,designer', 'data,analyst', 'project,manager', 'product,manager', 'account,manager', 'consultant', 'marketing', 'sales',
-    'data,scientist'))
+# c1, c2 = st.columns((4,3))
+# with c1:
+#     #for SCATTER PLOT
+#     st.title('Representation Among Job Types')
+#     plot_clusters()
 
-    st.write('You selected:', option)
+#STEPH: words below don't make sense. back burner until i figure a better way of displaying this
+# with c2:
+#     st.title('Find Matching Keywords')
+#     st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
+#     st.markdown("The displayed keywords are stemmed, ie 'analysis' --> 'analys' and 'commision' --> 'commiss'")
+#     option = st.selectbox(
+#         'Which job would you like to compare to?',
+#     ('ux,designer', 'data,analyst', 'project,manager', 'product,manager', 'account,manager', 'consultant', 'marketing', 'sales',
+#     'data,scientist'))
 
-    if user_input[0] != "":
-        matches, misses = word_similarity.resume_reader(user_input, option)
-        match_string = ' '.join(matches)
-        misses_string = ' '.join(misses)
+#     st.write('You selected:', option)
 
+#     if user_input[0] != "":
+#         matches, misses = word_similarity.resume_reader(user_input, option)
+#         match_string = ' '.join(matches)
+#         misses_string = ' '.join(misses)
 
-        st.markdown('Matching Words:')
-        display_wordcloud(match_string)  # Display word cloud for matching words
-        st.markdown('Missing Words:')
-        display_wordcloud(misses_string)  # Display word cloud for missing words
+        # st.markdown('Matching Words:')
+        # display_wordcloud(match_string)  # Display word cloud for matching words
+        # st.markdown('Missing Words:')
+        # display_wordcloud(misses_string)  # Display word cloud for missing words
 
 
 
