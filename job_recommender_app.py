@@ -13,6 +13,20 @@ import matplotlib.colors as mcolors
 from wordcloud import WordCloud
 
 
+
+
+def convert_job_names(job_name):
+    '''
+    Convert job names to more readable format
+    '''
+    #print("in convert job fun: ", job_name)
+    job_name = job_name.replace(',', ' ')
+    job_name = job_name.title()
+    return job_name
+
+
+
+
 # UI Stuff
 #Wide layout
 st.set_page_config(layout="wide")
@@ -60,6 +74,8 @@ classes, prob = pda.main(user_input, topic_model, classifier, vec)
 
 data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability'])
 
+
+
 #Plot probability of person belonging to a job class
 def plot_user_probability():
   
@@ -71,15 +87,18 @@ def plot_user_probability():
     #plotting bar graph
     data2 = data.sort_values(by=data.columns[1])#, ascending=False)
     # plt.barh(data2['jobs'], data2['probability'], color = 'r')
+    converted_job_data = data2
+    #change job names to readable format
+    converted_job_data['jobs']=converted_job_data['jobs'].apply(convert_job_names)
 
     #Gradient color map
     cmap = plt.get_cmap('cividis')
-    norm = mcolors.Normalize(vmin=data2['probability'].min(), vmax=data2['probability'].max())
-    colors = cmap(norm(data2['probability']))
+    norm = mcolors.Normalize(vmin=converted_job_data['probability'].min(), vmax=converted_job_data['probability'].max())
+    colors = cmap(norm(converted_job_data['probability']))
 
     #Plot
     fig, ax = plt.subplots()
-    bars = ax.barh(data2['jobs'], data2['probability'], color=colors)
+    bars = ax.barh(converted_job_data['jobs'], converted_job_data['probability'], color=colors)
 
     # Set the background to be transparent
     fig.patch.set_alpha(0.0)
@@ -151,11 +170,14 @@ with c2:
         st.write("Please enter your resume in the text box above or upload a PDF file")
     else:
         top_profession = problst[0][0]
+        readable_profession_name = convert_job_names(top_profession)
         st.markdown(
-            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{top_profession}</span>:</h3>",
+            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{readable_profession_name}</span>:</h3>",
             unsafe_allow_html=True)
         joblst = pda.returnJobsByKeywd(top_profession)
         top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst)
+        #Change names to readable format
+        top5matchedJobs['Job'] = top5matchedJobs['Job'].apply(convert_job_names)
 
       # Display job cards
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
@@ -165,7 +187,7 @@ with c2:
             st.markdown(
                         f"""
                             <div class="job-card">
-                                <div class="job-title">{job[1]}</div>
+                                <div class="job-title">{job['Job']}</div>
                                 <div class="job-similarity" style="color: yellow;">Similarity: {job_similarity}%</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
