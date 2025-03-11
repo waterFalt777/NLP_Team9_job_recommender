@@ -115,7 +115,8 @@ def calculate_job_similarities(user_input, top_5_jobs_df):
     similarity_df = pd.DataFrame({
         'Description': top_5_jobs_df['Description'],
         'Job': top_5_jobs_df['Job'],
-        'Similarity': cosine_similarities[0] * 100  # Convert to percentage
+        'Similarity': cosine_similarities[0] * 100, # Convert to percentage
+        'Job Title': top_5_jobs_df['Job Title']
     })
     
     # Sort by similarity score in descending order

@@ -22,6 +22,11 @@ def convert_job_names(job_name):
     #print("in convert job fun: ", job_name)
     job_name = job_name.replace(',', ' ')
     job_name = job_name.title()
+
+    #remove extra characters such as '[', ']' if in job_name
+    job_name = re.sub(r'[^\w\s]', '', job_name)
+
+   
     return job_name
 
 
@@ -178,6 +183,8 @@ with c2:
         top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst)
         #Change names to readable format
         top5matchedJobs['Job'] = top5matchedJobs['Job'].apply(convert_job_names)
+        top5matchedJobs['Job Title'] = top5matchedJobs['Job Title'].apply(convert_job_names)
+        
 
       # Display job cards
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
@@ -187,7 +194,7 @@ with c2:
             st.markdown(
                         f"""
                             <div class="job-card">
-                                <div class="job-title">{job['Job']}</div>
+                                <div class="job-title">{job['Job Title']}</div>
                                 <div class="job-similarity" style="color: yellow;">Similarity: {job_similarity}%</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
