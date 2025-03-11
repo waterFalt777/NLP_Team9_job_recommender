@@ -86,7 +86,7 @@ def returnJobsByKeywd(keyword):
     Takes in the user's top keyword and returns the top 5 jobs that belong to the keyword
     '''
     df = pd.read_csv('jobs.csv') #make this universal later
-    jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job'])
+    jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job']) 
     # Filter rows where the 'Job' column matches the user's keyword
     JobsByKeywd = jobs_df[jobs_df['Job'] == keyword]
    
@@ -117,6 +117,7 @@ def calculate_job_similarities(user_input, top_5_jobs_df):
         'Job': top_5_jobs_df['Job'],
         'Similarity': cosine_similarities[0] * 100, # Convert to percentage
         'Job Title': top_5_jobs_df['Job Title']
+        #'Salary Estimate': top_5_jobs_df['Salary Estimate']
     })
     
     # Sort by similarity score in descending order

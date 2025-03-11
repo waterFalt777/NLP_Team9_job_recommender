@@ -31,17 +31,20 @@ def create_clusters():
 
 
 def plot_PCA_2D(data, target, target_names, user_data):
+   
 
     colors = cycle(['black','g','b','c','m','y','orange','w','aqua','yellow'])
     target_ids = range(len(target_names))
 
-    #added
     fig, ax = plt.subplots(figsize=(10, 10))
+
 
     for i, c, label in zip(target_ids, colors, target_names):
         ax.scatter(data[target == i, 0], data[target == i, 1], c=c, label=label, edgecolors='gray')
     
-    ax.scatter(user_data[0][0], user_data[0][1], s=150, color='red', edgecolors='w', label='Your Resume')
+    ax.scatter(user_data[0][0], user_data[0][1], s=50, color='red', edgecolors='w', label='Your Resume')
+
+
 
     # Set the background to be transparent
     fig.patch.set_alpha(0.0)

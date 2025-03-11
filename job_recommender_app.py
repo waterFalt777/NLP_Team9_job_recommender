@@ -15,6 +15,17 @@ from wordcloud import WordCloud
 
 
 
+
+# UI Stuff
+#Wide layout
+st.set_page_config(layout="wide")
+
+# Load custom CSS from styles.css
+with open("styles.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+#Function
+
 def convert_job_names(job_name):
     '''
     Convert job names to more readable format
@@ -30,20 +41,8 @@ def convert_job_names(job_name):
     return job_name
 
 
-
-
-# UI Stuff
-#Wide layout
-st.set_page_config(layout="wide")
-# Load custom CSS from styles.css
-with open("styles.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-
-
-
 #Introduce App
-st.title('MSBA Analytic Career Dashboard 💼🐜🍽️')
+st.title("Peter's Job Recommendation System 🐜💼 ")
 st.sidebar.header('Submit Your Resume 📄')
 
 
@@ -151,19 +150,20 @@ def plot_clusters():
 
 c1, c2 = st.columns((4,3))
 with c1:
-   with st.container():
-    st.markdown('<div class="small-container>', unsafe_allow_html=True)
+    
+  with st.container():
     st.header('Top Matching Job Types')
     if str_user_input == "":
         st.write("Please enter your resume in the text box above or upload a PDF file")
     else:
-        st.markdown('<div class="small-container>', unsafe_allow_html=True)
         problst = plot_user_probability()
-   with st.container():
+    
+        
+    with st.container():
         st.header('Representation Among Job Types')
         if str_user_input != "":
-            st.markdown('<div class="small-container>', unsafe_allow_html=True)
             plot_clusters()
+
 
 
 with c2:
