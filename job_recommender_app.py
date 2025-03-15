@@ -190,7 +190,7 @@ with c2:
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
             job_description = job[0]
             short_description = ' '.join(job_description.split()[:300]) + '...'
-            job_similarity = job[2]
+            job_similarity = job[4]
             st.markdown(
                         f"""
                             <div class="job-card">

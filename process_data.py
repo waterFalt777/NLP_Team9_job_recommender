@@ -117,15 +117,23 @@ def calculate_job_similarities(user_input, top_5_jobs_df):
         'Job': top_5_jobs_df['Job'],
         'Similarity': cosine_similarities[0] * 100, # Convert to percentage
         'Job Title': top_5_jobs_df['Job Title']
-        #'Salary Estimate': top_5_jobs_df['Salary Estimate']
     })
     
     # Sort by similarity score in descending order
     ranked_jobs = similarity_df.sort_values(by='Similarity', ascending=False)
+
+    print("Original Similarity Scores:", ranked_jobs['Similarity'])
     
-    # Round similarity scores to 2 decimal places
-    ranked_jobs['Similarity'] = ranked_jobs['Similarity'].round(2)
+    # Normalize similarity scores to a higher range (e.g., 70–100)
+    min_similarity = ranked_jobs['Similarity'].min()
+    max_similarity = ranked_jobs['Similarity'].max()
+    new_min, new_max = 70, 100
+    ranked_jobs['Scaled Similarity'] = (
+        (ranked_jobs['Similarity'] - min_similarity) / (max_similarity - min_similarity) * (new_max - new_min) + new_min
+    ).round(2)
     
+    print("Scaled Similarity Scores:", ranked_jobs['Scaled Similarity'])
+    # Return the top 5 jobs with scaled similarity scores
     return ranked_jobs.head(5)
 
 
