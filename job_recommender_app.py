@@ -150,7 +150,8 @@ c1, c2, c3 = st.columns((3,4,3))
 with c1:
     
   with st.container():
-    st.header('Top Matching Job Types')
+    #st.header('Top Matching Job Types')
+    st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Top Matching Job Types</h2>", unsafe_allow_html=True)
     if str_user_input == "":
         st.write("Please enter your resume in the text box above or upload a PDF file")
     else:
@@ -158,7 +159,8 @@ with c1:
     
         
     with st.container():
-        st.header('Representation Among Job Types')
+        #st.header2('Representation Among Job Types')
+        st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Representation Among Job Types</h2>", unsafe_allow_html=True)
         if str_user_input != "":
             plot_clusters()
 
@@ -168,14 +170,14 @@ with c2:
     #STEPH
     if str_user_input == "":
         st.markdown(
-            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'> ... </span>:</h3>",
+            f"<h1 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'> ... </span>:</h1>",
             unsafe_allow_html=True)
         st.write("Please enter your resume in the text box above or upload a PDF file")
     else:
         top_profession = problst[0][0]
         readable_profession_name = convert_job_names(top_profession)
         st.markdown(
-            f"<h3 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{readable_profession_name}</span>:</h3>",
+            f"<h1 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{readable_profession_name}</span>:</h1>",
             unsafe_allow_html=True)
         joblst = pda.returnJobsByKeywd(top_profession)
         top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst)
@@ -188,7 +190,6 @@ with c2:
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
             job_description = job[0]
             short_description = ' '.join(job_description.split()[:300]) + '...'
-            #job_similarity = job[4] #used in donut chart 
             st.markdown(
                         f"""
                             <div class="job-card">
@@ -210,7 +211,8 @@ with c2:
                 
 
 with c3:
-    st.header("Job Match Percentage")
+    #st.header2("Job Match Percentage")
+    st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Job Match Percentage</h2>",unsafe_allow_html=True)
      # Function to create a donut chart
     def create_donut_chart(match_job, match_percentage):
             remaining_percentage = 100 - match_percentage
@@ -222,13 +224,12 @@ with c3:
             chart = alt.Chart(source).mark_arc(innerRadius=50).encode(
                 theta=alt.Theta(field="Value", type="quantitative"),
                 color=alt.Color(field="Category", type="nominal",
-                                scale=alt.Scale(domain=['Match'],#, 'Remaining'],
+                                scale=alt.Scale(domain=['Match'],
                                                 range=['#32de84'])),#, '#E0E0E0'])), #4CAF50- original green color
-                                                ##32de84 
                 tooltip=['Category', 'Value']
             ).properties(
-                width=200,
-                height=200
+                width=150,
+                height=150
             )
 
              # Add percentage text in the middle
