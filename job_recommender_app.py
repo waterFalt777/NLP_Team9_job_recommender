@@ -195,7 +195,7 @@ with c2:
                         f"""
                             <div class="job-card">
                                 <div class="job-title">{job['Job Title']}</div>
-                                <div class="job-similarity" style="color: yellow;">Similarity: {job_similarity}%</div>
+                                <div class="job-similarity" style="color: yellow;">Job Match: {job_similarity}%</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
                         """,
