@@ -10,7 +10,8 @@ import PyPDF2
 
 #added
 import matplotlib.colors as mcolors
-from wordcloud import WordCloud
+import altair as alt #donut chart
+
 
 
 
@@ -23,6 +24,10 @@ st.set_page_config(layout="wide")
 # Load custom CSS from styles.css
 with open("styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+#universal var
+top5matchedJobs = []
 
 #Function
 
@@ -137,18 +142,11 @@ def plot_clusters():
     pc.plot_PCA_2D(pca_train, y_train, y_vals, doc)
     st.pyplot()
 
-# Function to generate and display word cloud // BACK BURNER
-# def display_wordcloud(text):
-#     wordcloud = WordCloud(width=800, height=400, background_color='black', colormap='viridis').generate(text)
-#     fig, ax = plt.subplots()
-#     ax.imshow(wordcloud, interpolation='bilinear')
-#     ax.axis('off')
-#     st.pyplot(fig)
 
 
 #CONTAINERS IN DASHBOARD
 
-c1, c2 = st.columns((4,3))
+c1, c2, c3 = st.columns((3,4,3))
 with c1:
     
   with st.container():
@@ -190,12 +188,11 @@ with c2:
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
             job_description = job[0]
             short_description = ' '.join(job_description.split()[:300]) + '...'
-            job_similarity = job[4]
+            #job_similarity = job[4] #used in donut chart 
             st.markdown(
                         f"""
                             <div class="job-card">
                                 <div class="job-title">{job['Job Title']}</div>
-                                <div class="job-similarity" style="color: yellow;">Job Match: {job_similarity}%</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
                         """,
@@ -210,35 +207,47 @@ with c2:
                         """,
                         unsafe_allow_html=True
                     )
+                
+
+with c3:
+    st.header("Job Match Percentage")
+     # Function to create a donut chart
+    def create_donut_chart(match_job, match_percentage):
+            remaining_percentage = 100 - match_percentage
+            source = pd.DataFrame({
+                'Category': ['Match', 'Remaining'],
+                'Value': [match_percentage, remaining_percentage]
+            })
+            st.header3 = st.markdown(f"<h4 style='text-align: center; color: white;'>{match_job}</h4>", unsafe_allow_html=True)
+            chart = alt.Chart(source).mark_arc(innerRadius=50).encode(
+                theta=alt.Theta(field="Value", type="quantitative"),
+                color=alt.Color(field="Category", type="nominal",
+                                scale=alt.Scale(domain=['Match'],#, 'Remaining'],
+                                                range=['#32de84'])),#, '#E0E0E0'])), #4CAF50- original green color
+                                                ##32de84 
+                tooltip=['Category', 'Value']
+            ).properties(
+                width=200,
+                height=200
+            )
+
+             # Add percentage text in the middle
+            text = alt.Chart(pd.DataFrame({'text': [f"{match_percentage}%"]})).mark_text(
+                size=20, color='white', fontWeight='bold'
+            ).encode(
+                text='text:N'
+            )
+
+            return chart + text 
+     # Generate and display the donut chart
+    if str_user_input != "":
+        for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
+            jobTitle = job[3] #takes the job title
+            jobMatch = job[4] #takes the normalized similarity score
+            donut_chart = create_donut_chart(jobTitle, jobMatch) #passing in each job match %
+            st.altair_chart(donut_chart, use_container_width=True)
 
 
-# c1, c2 = st.columns((4,3))
-# with c1:
-#     #for SCATTER PLOT
-#     st.title('Representation Among Job Types')
-#     plot_clusters()
-
-#STEPH: words below don't make sense. back burner until i figure a better way of displaying this
-# with c2:
-#     st.title('Find Matching Keywords')
-#     st.markdown('This function shows you which keywords your resume either contains or doesnt contain, according to the most significant words in each job description.')
-#     st.markdown("The displayed keywords are stemmed, ie 'analysis' --> 'analys' and 'commision' --> 'commiss'")
-#     option = st.selectbox(
-#         'Which job would you like to compare to?',
-#     ('ux,designer', 'data,analyst', 'project,manager', 'product,manager', 'account,manager', 'consultant', 'marketing', 'sales',
-#     'data,scientist'))
-
-#     st.write('You selected:', option)
-
-#     if user_input[0] != "":
-#         matches, misses = word_similarity.resume_reader(user_input, option)
-#         match_string = ' '.join(matches)
-#         misses_string = ' '.join(misses)
-
-        # st.markdown('Matching Words:')
-        # display_wordcloud(match_string)  # Display word cloud for matching words
-        # st.markdown('Missing Words:')
-        # display_wordcloud(misses_string)  # Display word cloud for missing words
 
 
 
