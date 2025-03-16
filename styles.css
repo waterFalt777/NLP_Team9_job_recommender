@@ -1,0 +1,49 @@
+/* styles.css */
+.job-card {
+    border: 2px solid rgb(238, 243, 243);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.job-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+.job-description {
+    font-size: 16px;
+    color: white;
+    overflow: hidden;
+    max-height: 100px;
+    transition: max-height 0.3s ease;
+    
+}
+.job-description.expanded {
+    max-height: none;
+}
+.read-more {
+    color: yellow;
+    cursor: pointer;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: black;
+    padding: 5px;
+}
+
+.expanded-job-description {
+    max-height: 200px; /* Adjust the height as needed */
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+     /* background-color: #f9f9f9; Light background for readability */
+}
+
+/*DOESN'T work*/
+.small-container{
+    border: 3px solid gold;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
