@@ -64,7 +64,7 @@ if uploaded_file is not None:
         page = pdf_reader.pages[page_num]
         user_input += page.extract_text()
 else:
-    user_input = st.sidebar.text_area("Or copy and paste your resume or LinkedIn here", '')
+    user_input = st.sidebar.text_area("Or copy and paste your resume", '')
 
 user_input = str(user_input)
 user_input = re.sub('[^a-zA-Z0-9\.]', ' ', user_input)
@@ -74,14 +74,23 @@ user_input = pd.Series(str_user_input)
 
 
 
-#load NLP + classification models
+#Pre-Coded by the Owner: Load NLP + classification models
+ 
+#1. Breaks down the resume into related job topics 
 topic_model = pickle.load(open('topic_model.sav', 'rb'))
-classifier = pickle.load(open('classification_model.sav', 'rb'))
-vec = pickle.load(open('job_vec.sav', 'rb'))
 
-classes, prob = pda.main(user_input, topic_model, classifier, vec)
+#2. Takes the related job topics and classify resume into the best job class 
+classifier = pickle.load(open('classification_model.sav', 'rb')) 
 
-data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability'])
+#3.Vectorize the resume after tokenization)
+vec = pickle.load(open('job_vec.sav', 'rb')) 
+
+#4. Get the job classes and their probabilities from another function <main()> in another file <process_data.py> 
+# and stores the output in classes and prob
+classes, prob = pda.main(user_input, topic_model, classifier, vec) 
+
+#5. Create a dataframe with the job classes and their probabilities
+data = pd.DataFrame(zip(classes.T, prob.T), columns = ['jobs', 'probability']) 
 
 
 

@@ -83,7 +83,7 @@ def process_data():
 #STEPH
 def returnJobsByKeywd(keyword):
     '''
-    Takes in the user's top keyword and returns the top 5 jobs that belong to the keyword
+    Takes in the user's top keyword and returns ALL jobs that belong to the keyword 
     '''
     df = pd.read_csv('jobs.csv') #make this universal later
     jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job']) 
@@ -94,7 +94,7 @@ def returnJobsByKeywd(keyword):
     return JobsByKeywd
 
 #ANI
-def calculate_job_similarities(user_input, top_5_jobs_df):
+def calculate_job_similarities(user_input, joblst):
     '''
     Calculate cosine similarity between user input and job descriptions,
     rank jobs, and return similarity scores as percentages
@@ -102,21 +102,21 @@ def calculate_job_similarities(user_input, top_5_jobs_df):
     # Initialize TF-IDF vectorizer
     tfidf = TfidfVectorizer(stop_words='english')
     
-    # Combine user input and job descriptions
-    all_text = [user_input] + list(top_5_jobs_df['Description'])
+    # Combine resume content and job descriptions
+    all_text = [user_input] + list(joblst['Description'])
     
     # Create TF-IDF matrix
     tfidf_matrix = tfidf.fit_transform(all_text)
     
-    # Calculate cosine similarity between user input and each job description
+    # Calculate cosine similarity between resume and each job description
     cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
     
     # Create a dataframe with jobs and their similarity scores
     similarity_df = pd.DataFrame({
-        'Description': top_5_jobs_df['Description'],
-        'Job': top_5_jobs_df['Job'],
+        'Description': joblst['Description'],
+        'Job': joblst['Job'],
         'Similarity': cosine_similarities[0] * 100, # Convert to percentage
-        'Job Title': top_5_jobs_df['Job Title']
+        'Job Title': joblst['Job Title']
     })
     
     # Sort by similarity score in descending order
@@ -124,13 +124,22 @@ def calculate_job_similarities(user_input, top_5_jobs_df):
 
     #print("Original Similarity Scores:", ranked_jobs['Similarity'])
     
-    # Normalize similarity scores to a higher range (e.g., 70–100)
+
+    # Dynamic Normalization
     min_similarity = ranked_jobs['Similarity'].min()
     max_similarity = ranked_jobs['Similarity'].max()
-    new_min, new_max = 70, 100
+    mean_similarity = ranked_jobs['Similarity'].mean()
+    
+    # Scale similarity scores to a 0–100 range
     ranked_jobs['Scaled Similarity'] = (
-        (ranked_jobs['Similarity'] - min_similarity) / (max_similarity - min_similarity) * (new_max - new_min) + new_min
+        (ranked_jobs['Similarity'] - min_similarity) / (max_similarity - min_similarity) * 100
     ).round(2)
+    
+    # Adjusted match score based on mean similarity
+    ranked_jobs['Match Score'] = (
+        (ranked_jobs['Scaled Similarity'] - mean_similarity) / (max_similarity - mean_similarity) * 100
+    ).round(2)
+
     
     #print("Scaled Similarity Scores:", ranked_jobs['Scaled Similarity'])
     # Return the top 5 jobs with scaled similarity scores
