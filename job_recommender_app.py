@@ -193,6 +193,7 @@ with c2:
         #Change names to readable format
         top5matchedJobs['Job'] = top5matchedJobs['Job'].apply(convert_job_names)
         top5matchedJobs['Job Title'] = top5matchedJobs['Job Title'].apply(convert_job_names)
+        top5matchedJobs['Skills'] = top5matchedJobs['Skills'].apply(convert_job_names)
         
 
       # Display job cards
@@ -203,6 +204,7 @@ with c2:
                         f"""
                             <div class="job-card">
                                 <div class="job-title">{job['Job Title']}</div>
+                                 <div class="job-description">Skills: {job['Skills']}</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
                         """,
@@ -253,7 +255,7 @@ with c3:
     if str_user_input != "":
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
             jobTitle = job[3] #takes the job title
-            jobMatch = job[4] #takes the normalized similarity score
+            jobMatch = job[5] #takes the normalized similarity score
             donut_chart = create_donut_chart(jobTitle, jobMatch) #passing in each job match %
             st.altair_chart(donut_chart, use_container_width=True)
 

@@ -67,6 +67,7 @@ def process_data():
     #read in jobs file and get descriptions
     df = pd.read_csv('jobs.csv')
     #df = df[df.keyword!='marketing']
+    #need to add in the skills
     jobs_df = pd.DataFrame(zip(df['Job Description'], df['keyword']), columns = ['Description', 'Job'])
 
     array, doc, topic_model, vec, topic_list  = return_topics(jobs_df['Description'],20, 10, TruncatedSVD, TfidfVectorizer)
@@ -85,13 +86,52 @@ def returnJobsByKeywd(keyword):
     '''
     Takes in the user's top keyword and returns ALL jobs that belong to the keyword 
     '''
-    df = pd.read_csv('jobs.csv') #make this universal later
-    jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword']), columns=['Description', 'Job Title', 'Job']) 
+    #jobs_data_skills.csv
+    df = pd.read_csv('jobs_data_skills.csv') #universal? or leave this to access diff job dataset?
+    jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword'], df['Skills']), columns=['Description', 'Job Title', 'Job', 'Skills']) 
     # Filter rows where the 'Job' column matches the user's keyword
     JobsByKeywd = jobs_df[jobs_df['Job'] == keyword]
    
     
     return JobsByKeywd
+
+#import spacy
+
+# Load spaCy's pre-trained NER model
+#nlp = spacy.load("en_core_web_sm")
+
+
+
+#IN PROGRESS
+# def extract_entities(text):
+#     doc = nlp(text)
+#     entities = {
+#         "skills": [],
+#        # "job_titles": [],
+#         #"locations": []
+#     }
+    #add values from skills_desc column directly
+
+
+    # for ent in doc.ents:
+    #     if ent.label_ == "ORG":  # Example: Organizations
+    #         entities["skills"].append(ent.text)
+    #     elif ent.label_ == "GPE":  # Example: Locations
+    #         entities["locations"].append(ent.text)
+    #     elif ent.label_ == "JOB_TITLE":  # Custom label for job titles (requires training)
+    #         entities["job_titles"].append(ent.text)
+    return entities
+
+# Example usage: TESTING
+# resume_text = "Experienced Data Scientist with skills in Python, Machine Learning, and SQL. Based in New York."
+# job_description = "Looking for a Data Scientist skilled in Python, SQL, and Data Analysis. Location: San Francisco."
+
+# resume_entities = extract_entities(resume_text)
+# job_entities = extract_entities(job_description)
+# print("Resume Entities:", resume_entities)
+# print("Job Entities:", job_entities)
+
+
 
 #ANI
 def calculate_job_similarities(user_input, joblst):
@@ -116,7 +156,8 @@ def calculate_job_similarities(user_input, joblst):
         'Description': joblst['Description'],
         'Job': joblst['Job'],
         'Similarity': cosine_similarities[0] * 100, # Convert to percentage
-        'Job Title': joblst['Job Title']
+        'Job Title': joblst['Job Title'],
+        'Skills': joblst['Skills']
     })
     
     # Sort by similarity score in descending order
