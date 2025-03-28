@@ -5,6 +5,57 @@
     border-radius: 5px;
     margin-bottom: 10px;
 }
+
+/* Job header with title and progress bar */
+.job-header {
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Progress bar container */
+.progress-bar-container {
+    width: 50%; /* Adjust width as needed */
+    background-color: #444;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 10px;
+    /*margin-left: 16px;*/
+    margin-top: 8px; /*Add space above the progress bar*/
+    margin-bottom: 8px; /* Add space below the progress bar */
+    position: relative; /* Position relative for percentage text */
+
+}
+
+/* Progress bar */
+.progress-bar {
+    height: 100%;
+    background-color: #32de84; /* Green color */
+    transition: width 0.3s ease-in-out;
+    border-radius: 4px 0 0 4px; /* Rounded corners on the left side */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional shadow */
+
+
+
+}
+
+
+/* Percentage text */
+.progress-percentage {
+    position: absolute;
+    top: 50%;
+    left: 10%; /* Position it to the right of the progress bar */
+    transform: translateY(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: rgb(1, 1, 95);
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+
+
 .job-title {
     font-size: 20px;
     font-weight: bold;

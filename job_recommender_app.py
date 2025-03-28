@@ -155,7 +155,37 @@ def plot_clusters():
 
 #CONTAINERS IN DASHBOARD
 
-c1, c2, c3 = st.columns((3,4,3))
+#functions:
+def create_donut_chart(match_job, match_percentage):
+            remaining_percentage = 100 - match_percentage
+            source = pd.DataFrame({
+                'Category': ['Match', 'Remaining'],
+                'Value': [match_percentage, remaining_percentage]
+            })
+            st.header3 = st.markdown(f"<h4 style='text-align: center; color: white;'>{match_job}</h4>", unsafe_allow_html=True)
+            chart = alt.Chart(source).mark_arc(innerRadius=50).encode(
+                theta=alt.Theta(field="Value", type="quantitative"),
+                color=alt.Color(field="Category", type="nominal",
+                                scale=alt.Scale(domain=['Match'],
+                                                range=['#32de84'])),#, '#E0E0E0'])), #4CAF50- original green color
+                tooltip=['Category', 'Value']
+            ).properties(
+                width=150,
+                height=150
+            )
+
+             # Add percentage text in the middle
+            text = alt.Chart(pd.DataFrame({'text': [f"{match_percentage}%"]})).mark_text(
+                size=20, color='white', fontWeight='bold'
+            ).encode(
+                text='text:N'
+            )
+
+            return chart + text 
+
+
+
+c1, c2= st.columns((3,4))
 with c1:
     
   with st.container():
@@ -202,11 +232,17 @@ with c2:
         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
             job_description = job[0]
             short_description = ' '.join(job_description.split()[:300]) + '...'
+            match_percentage = job['Scaled Similarity']  #match percentage
+
             st.markdown(
                         f"""
                             <div class="job-card">
-                                <div class="job-title">{job['Job Title']}</div>
-                                 <div class="job-description">Skills: {job['Skills']}</div>
+                                <div class="job-header">{job['Job Title']}</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-percentage">{match_percentage}%</div>
+                                    <div class="progress-bar" style="width: {match_percentage}%;"></div>
+                                </div>
+                                <div class="job-description">Skills: {job['Skills']}</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
                         """,
@@ -223,42 +259,42 @@ with c2:
                     )
                 
 
-with c3:
-    st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Job Match Percentage</h2>",unsafe_allow_html=True)
-     # Function to create a donut chart
-    def create_donut_chart(match_job, match_percentage):
-            remaining_percentage = 100 - match_percentage
-            source = pd.DataFrame({
-                'Category': ['Match', 'Remaining'],
-                'Value': [match_percentage, remaining_percentage]
-            })
-            st.header3 = st.markdown(f"<h4 style='text-align: center; color: white;'>{match_job}</h4>", unsafe_allow_html=True)
-            chart = alt.Chart(source).mark_arc(innerRadius=50).encode(
-                theta=alt.Theta(field="Value", type="quantitative"),
-                color=alt.Color(field="Category", type="nominal",
-                                scale=alt.Scale(domain=['Match'],
-                                                range=['#32de84'])),#, '#E0E0E0'])), #4CAF50- original green color
-                tooltip=['Category', 'Value']
-            ).properties(
-                width=150,
-                height=150
-            )
+# with c3:
+#     st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Job Match Percentage</h2>",unsafe_allow_html=True)
+#      # Function to create a donut chart
+#     def create_donut_chart(match_job, match_percentage):
+#             remaining_percentage = 100 - match_percentage
+#             source = pd.DataFrame({
+#                 'Category': ['Match', 'Remaining'],
+#                 'Value': [match_percentage, remaining_percentage]
+#             })
+#             st.header3 = st.markdown(f"<h4 style='text-align: center; color: white;'>{match_job}</h4>", unsafe_allow_html=True)
+#             chart = alt.Chart(source).mark_arc(innerRadius=50).encode(
+#                 theta=alt.Theta(field="Value", type="quantitative"),
+#                 color=alt.Color(field="Category", type="nominal",
+#                                 scale=alt.Scale(domain=['Match'],
+#                                                 range=['#32de84'])),#, '#E0E0E0'])), #4CAF50- original green color
+#                 tooltip=['Category', 'Value']
+#             ).properties(
+#                 width=150,
+#                 height=150
+#             )
 
-             # Add percentage text in the middle
-            text = alt.Chart(pd.DataFrame({'text': [f"{match_percentage}%"]})).mark_text(
-                size=20, color='white', fontWeight='bold'
-            ).encode(
-                text='text:N'
-            )
+#              # Add percentage text in the middle
+#             text = alt.Chart(pd.DataFrame({'text': [f"{match_percentage}%"]})).mark_text(
+#                 size=20, color='white', fontWeight='bold'
+#             ).encode(
+#                 text='text:N'
+#             )
 
-            return chart + text 
-     # Generate and display the donut chart
-    if str_user_input != "":
-        for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
-            jobTitle = job[3] #takes the job title
-            jobMatch = job[5] #takes the normalized similarity score
-            donut_chart = create_donut_chart(jobTitle, jobMatch) #passing in each job match %
-            st.altair_chart(donut_chart, use_container_width=True)
+#             return chart + text 
+#      # Generate and display the donut chart
+#     if str_user_input != "":
+#         for i, (index, job) in enumerate(top5matchedJobs.iterrows()):
+#             jobTitle = job[3] #takes the job title
+#             jobMatch = job[5] #takes the normalized similarity score
+#             donut_chart = create_donut_chart(jobTitle, jobMatch) #passing in each job match %
+#             st.altair_chart(donut_chart, use_container_width=True)
 
 
 
