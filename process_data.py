@@ -121,6 +121,7 @@ def calculate_final_score(similarity_score,entity_scores, weights):
     """
     Combine similarity score and entity scores into a final weighted score.
     """
+    
     final_score = (
         weights["similarity"] * similarity_score +
         weights["skills"] * entity_scores["skills_overlap"]
@@ -134,6 +135,16 @@ def calculate_job_similarities(user_input, joblst, weights):
     Calculate cosine similarity between user input and job descriptions,
     rank jobs, and return similarity scores as percentages
     '''
+
+    # Preprocess joblst
+    # Drop rows with missing or empty descriptions
+    joblst = joblst[joblst['Description'].notna()]
+    joblst = joblst[joblst['Description'].str.strip() != ""]
+    # Reset the index to ensure alignment
+    joblst = joblst.reset_index(drop=True)
+
+
+
     # Initialize TF-IDF vectorizer
     tfidf = TfidfVectorizer(stop_words='english')
     
@@ -167,12 +178,6 @@ def calculate_job_similarities(user_input, joblst, weights):
     
     # Create a dataframe with jobs and their similarity scores
     ranked_jobs_df = pd.DataFrame(ranked_jobs)
-    
-    # Mistkae: should sort after dynamic norm Sort by similarity score in descending order
-    #ranked_jobs = ranked_jobs_df.sort_values(by='Similarity', ascending=False)
-
-    #print("Original Similarity Scores:", ranked_jobs['Similarity'])
-    
 
     # Dynamic Normalization
     min_similarity = ranked_jobs_df['Similarity'].min()
