@@ -40,6 +40,8 @@ def display_topics(model, feature_names, no_top_words, topic_names=None):
                        for k in topic.argsort()[:-no_top_words - 1:-1]]))
     return model.components_, topic_list
 
+
+
 def return_topics(series, num_topics, no_top_words, model, vectorizer):
     '''
     returns document_topic matrix and topic modeling model
@@ -66,8 +68,6 @@ def process_data():
     '''
     #read in jobs file and get descriptions
     df = pd.read_csv('jobs.csv')
-    #df = df[df.keyword!='marketing']
-    #need to add in the skills
     jobs_df = pd.DataFrame(zip(df['Job Description'], df['keyword']), columns = ['Description', 'Job'])
 
     array, doc, topic_model, vec, topic_list  = return_topics(jobs_df['Description'],20, 10, TruncatedSVD, TfidfVectorizer)
@@ -86,8 +86,7 @@ def returnJobsByKeywd(keyword):
     '''
     Takes in the user's top keyword and returns ALL jobs that belong to the keyword 
     '''
-    #jobs_data_skills.csv
-    df = pd.read_csv('jobs_data_skills.csv') #universal? or leave this to access diff job dataset?
+    df = pd.read_csv('jobs_data_skills.csv') #Leave this to access the other job dataset with the Skills column
     jobs_df = pd.DataFrame(zip(df['Job Description'], df['Job Title'], df['keyword'], df['Skills']), columns=['Description', 'Job Title', 'Job', 'Skills']) 
     # Filter rows where the 'Job' column matches the user's keyword
     JobsByKeywd = jobs_df[jobs_df['Job'] == keyword]
@@ -95,46 +94,42 @@ def returnJobsByKeywd(keyword):
     
     return JobsByKeywd
 
-#import spacy
-
-# Load spaCy's pre-trained NER model
-#nlp = spacy.load("en_core_web_sm")
 
 
+def calculate_entity_match_score(resume_entities, job_entities):
+    """
+    Calculate the skills overlap between the resume and job description.
+    """
+    # Extract skills from resume and job description
+    resume_skills = set(resume_entities["skills"])
+    job_skills = set(job_entities["skills"])
 
-#IN PROGRESS
-# def extract_entities(text):
-#     doc = nlp(text)
-#     entities = {
-#         "skills": [],
-#        # "job_titles": [],
-#         #"locations": []
-#     }
-    #add values from skills_desc column directly
+    # Calculate the number of overlapping skills
+    overlapping_skills = len(resume_skills & job_skills)
 
+    # Normalize the skills match score
+    skills_overlap = overlapping_skills / len(job_skills) if len(job_skills) > 0 else 0
 
-    # for ent in doc.ents:
-    #     if ent.label_ == "ORG":  # Example: Organizations
-    #         entities["skills"].append(ent.text)
-    #     elif ent.label_ == "GPE":  # Example: Locations
-    #         entities["locations"].append(ent.text)
-    #     elif ent.label_ == "JOB_TITLE":  # Custom label for job titles (requires training)
-    #         entities["job_titles"].append(ent.text)
-    return entities
-
-# Example usage: TESTING
-# resume_text = "Experienced Data Scientist with skills in Python, Machine Learning, and SQL. Based in New York."
-# job_description = "Looking for a Data Scientist skilled in Python, SQL, and Data Analysis. Location: San Francisco."
-
-# resume_entities = extract_entities(resume_text)
-# job_entities = extract_entities(job_description)
-# print("Resume Entities:", resume_entities)
-# print("Job Entities:", job_entities)
+    return {
+        "skills_overlap": skills_overlap
+    }
 
 
 
-#ANI
-def calculate_job_similarities(user_input, joblst):
+#Combine score:
+def calculate_final_score(similarity_score,entity_scores, weights):
+    """
+    Combine similarity score and entity scores into a final weighted score.
+    """
+    final_score = (
+        weights["similarity"] * similarity_score +
+        weights["skills"] * entity_scores["skills_overlap"]
+    )
+    return final_score
+
+
+#ANI & added on by STEPH
+def calculate_job_similarities(user_input, joblst, weights):
     '''
     Calculate cosine similarity between user input and job descriptions,
     rank jobs, and return similarity scores as percentages
@@ -150,41 +145,57 @@ def calculate_job_similarities(user_input, joblst):
     
     # Calculate cosine similarity between resume and each job description
     cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
+
+     # Calculate entity match scores for skills
+    ranked_jobs = []
+    for i, job in joblst.iterrows():
+        resume_entities = {"skills": user_input.split()}  # Example: Extract skills from resume
+        job_entities = {"skills": job["Skills"].split(",")}  # Example: Extract skills from job description
+        entity_scores = calculate_entity_match_score(resume_entities, job_entities)
+        
+        # Combine similarity score and skills match score
+        final_score = calculate_final_score(cosine_similarities[0][i], entity_scores, weights)
+        
+        ranked_jobs.append({
+            "Description": job["Description"],
+            "Job": job["Job"],
+            "Similarity": final_score,
+            "Job Title": job["Job Title"],
+            "Skills": job["Skills"]
+        })
+    
     
     # Create a dataframe with jobs and their similarity scores
-    similarity_df = pd.DataFrame({
-        'Description': joblst['Description'],
-        'Job': joblst['Job'],
-        'Similarity': cosine_similarities[0] * 100, # Convert to percentage
-        'Job Title': joblst['Job Title'],
-        'Skills': joblst['Skills']
-    })
+    ranked_jobs_df = pd.DataFrame(ranked_jobs)
     
-    # Sort by similarity score in descending order
-    ranked_jobs = similarity_df.sort_values(by='Similarity', ascending=False)
+    # Mistkae: should sort after dynamic norm Sort by similarity score in descending order
+    #ranked_jobs = ranked_jobs_df.sort_values(by='Similarity', ascending=False)
 
     #print("Original Similarity Scores:", ranked_jobs['Similarity'])
     
 
     # Dynamic Normalization
-    min_similarity = ranked_jobs['Similarity'].min()
-    max_similarity = ranked_jobs['Similarity'].max()
-    mean_similarity = ranked_jobs['Similarity'].mean()
+    min_similarity = ranked_jobs_df['Similarity'].min()
+    max_similarity = ranked_jobs_df['Similarity'].max()
+    mean_similarity = ranked_jobs_df['Similarity'].mean()
     
     # Scale similarity scores to a 0–100 range
-    ranked_jobs['Scaled Similarity'] = (
-        (ranked_jobs['Similarity'] - min_similarity) / (max_similarity - min_similarity) * 100
+    ranked_jobs_df['Scaled Similarity'] = (
+        (ranked_jobs_df['Similarity'] - min_similarity) / (max_similarity - min_similarity) * 100
     ).round(2)
     
     # Adjusted match score based on mean similarity
-    ranked_jobs['Match Score'] = (
-        (ranked_jobs['Scaled Similarity'] - mean_similarity) / (max_similarity - mean_similarity) * 100
+    ranked_jobs_df['Match Score'] = (
+        (ranked_jobs_df['Scaled Similarity'] - mean_similarity) / (max_similarity - mean_similarity) * 100
     ).round(2)
 
-    
-    #print("Scaled Similarity Scores:", ranked_jobs['Scaled Similarity'])
+    # Sort by scaled similarity score in descending order
+    sorted_ranked_jobs_df = ranked_jobs_df.sort_values(by="Scaled Similarity", ascending=False)
+
+
     # Return the top 5 jobs with scaled similarity scores
-    return ranked_jobs.head(5)
+    return sorted_ranked_jobs_df.head(5)
+
 
 
 

@@ -168,7 +168,6 @@ with c1:
     
         
     with st.container():
-        #st.header2('Representation Among Job Types')
         st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Representation Among Job Types</h2>", unsafe_allow_html=True)
         if str_user_input != "":
             plot_clusters()
@@ -189,7 +188,10 @@ with c2:
             f"<h1 style='text-align: center; color: white;'>TOP MATCHING JOBS For <span style='color: yellow;'>{readable_profession_name}</span>:</h1>",
             unsafe_allow_html=True)
         joblst = pda.returnJobsByKeywd(top_profession)
-        top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst)
+        #assign specific weights to the similarity and skills
+        weights = {"similarity": 0.7, "skills": 0.3}
+        # Calculate the similarity score between the user input and the job descriptions (see process_data.py)
+        top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst, weights)
         #Change names to readable format
         top5matchedJobs['Job'] = top5matchedJobs['Job'].apply(convert_job_names)
         top5matchedJobs['Job Title'] = top5matchedJobs['Job Title'].apply(convert_job_names)
@@ -222,7 +224,6 @@ with c2:
                 
 
 with c3:
-    #st.header2("Job Match Percentage")
     st.header3 = st.markdown(f"<h2 style='text-align: center; color: white;'>Job Match Percentage</h2>",unsafe_allow_html=True)
      # Function to create a donut chart
     def create_donut_chart(match_job, match_percentage):
