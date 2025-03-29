@@ -1,9 +1,8 @@
 # Job Recommendation System
 
-Find not just which type of profession your resume aligns with but also which job postings in that related field are the best for you!
+ Welcome ! ☕💻 This Job Recommender is based off another repo https://github.com/prestonlam53/building_job_recommender_3 for a UCI MSBA Natural Language Processing Course during Winter Quarter '25 group project and aims to let  users are upload their resume pdfs to match their job preferences. 💼 Find not just which type of profession your resume aligns with but also which job postings in that related field are the best for you!
 
-*Project Info: This was a group project for UCI MSBA Natural Language Processing Course during Winter Quarter '25. The project is now being continued by Stephany as a personal project to make further improvements 
-on functionality and interface. 
+Notes: The project is now being continued by Stephany as a personal project to make further improvements on functionality and interface. 
 
 # Example of Interface
 
