@@ -49,8 +49,6 @@ def convert_job_names(job_name):
 #Introduce App
 st.title("Peter's Job Recommendation System 🐜💼 ")
 st.sidebar.header('Submit Your Resume 📄')
-
-
 st.markdown('This dashboard is designed to help you find the best job for you based on your resume')
 
 # Upload resume file
@@ -73,6 +71,15 @@ str_user_input = user_input.lower()
 user_input = pd.Series(str_user_input)
 
 
+
+#AI Resume Assistant Chat
+with st.sidebar:
+    messages = st.container(height=300)
+    if prompt := st.chat_input("Ask me advice about your resume!"):
+        messages.chat_message("user").write(prompt)
+        messages.chat_message("assistant").write(f"AI Resume Assistant 💼: {prompt}")
+
+        
 
 #Pre-Coded by the Owner: Load NLP + classification models
  
@@ -153,9 +160,8 @@ def plot_clusters():
 
 
 
-#CONTAINERS IN DASHBOARD
 
-#functions:
+#functions for container in dashboard:
 def create_donut_chart(match_job, match_percentage):
             remaining_percentage = 100 - match_percentage
             source = pd.DataFrame({
@@ -185,6 +191,8 @@ def create_donut_chart(match_job, match_percentage):
 
 
 
+
+#CONTAINERS IN DASHBOARD
 c1, c2= st.columns((3,4))
 with c1:
     
