@@ -91,6 +91,21 @@
      /* background-color: #f9f9f9; Light background for readability */
 }
 
+
+/* Highlighted skills */
+.skill-highlight {
+    display: inline-block; /* Ensures each skill is treated as a block */
+    background-color: #f0f8ff; /* Light blue background */
+    color: #00008b; /* Dark blue text */
+    border: 1px solid #00008b; /* Dark blue border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 2px 6px; /* Padding inside the skill box */
+    margin: 2px; /* Space between skills */
+    font-size: 12px; /* Adjust font size */
+    font-weight: bold; /* Make the text bold */
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
 /*DOESN'T work*/
 .small-container{
     border: 3px solid gold;

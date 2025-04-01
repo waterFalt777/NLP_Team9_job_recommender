@@ -189,7 +189,11 @@ def create_donut_chart(match_job, match_percentage):
 
             return chart + text 
 
-
+# Function to format skills with highlights
+def format_skills(skills):
+    skill_list = skills.split(" ")  # Assuming skills are comma-separated
+    highlighted_skills = [f"<span class='skill-highlight'>{skill.strip()}</span>" for skill in skill_list]
+    return " ".join(highlighted_skills)
 
 
 #CONTAINERS IN DASHBOARD
@@ -241,6 +245,7 @@ with c2:
             job_description = job[0]
             short_description = ' '.join(job_description.split()[:300]) + '...'
             match_percentage = job['Scaled Similarity']  #match percentage
+            highlighted_skills = format_skills(job['Skills'])  # Highlight skills
 
             st.markdown(
                         f"""
@@ -250,7 +255,7 @@ with c2:
                                     <div class="progress-percentage">{match_percentage}%</div>
                                     <div class="progress-bar" style="width: {match_percentage}%;"></div>
                                 </div>
-                                <div class="job-description">Skills: {job['Skills']}</div>
+                                <div class="job-description">Skills: {highlighted_skills}</div>
                                 <div class="job-description">{short_description}</div>
                             </div>
                         """,
