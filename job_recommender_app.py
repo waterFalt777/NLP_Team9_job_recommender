@@ -231,7 +231,7 @@ with c2:
             unsafe_allow_html=True)
         joblst = pda.returnJobsByKeywd(top_profession)
         #assign specific weights to the similarity and skills
-        weights = {"similarity": 0.7, "skills": 0.3}
+        weights = {"similarity": 0.3, "skills": 0.7}
         # Calculate the similarity score between the user input and the job descriptions (see process_data.py)
         top5matchedJobs = pda.calculate_job_similarities(str_user_input, joblst, weights)
         #Change names to readable format
